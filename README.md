@@ -5,9 +5,11 @@
 
 **SM Courier Service** is a console-based Courier Management System developed using **Java**. The project provides separate functionalities for customers and administrators to manage courier deliveries.
 
-Customers can create a new courier, receive a unique courier ID, calculate the delivery charge based on package weight, and track their package status. Administrators can view all courier records, update delivery statuses, and calculate the total revenue generated from the registered couriers.
+Customers can create a new courier, receive a unique courier ID, get the delivery charge calculated from the package weight, and track their package status. Administrators can view all courier records, update delivery statuses, view the total revenue, see how many couriers are in each status, and sort couriers by charge.
 
-The project demonstrates the practical implementation of fundamental Java programming concepts such as **methods, arrays, loops, conditional statements, switch statements, Scanner input, and basic data management**.
+All courier data is saved to a text file, so records are still available the next time the program is run.
+
+The project demonstrates **object-oriented programming (classes, constructors, encapsulation), exception handling, string handling, file I/O, the Collections Framework, lambda expressions and streams**, along with core concepts such as methods, loops and switch statements.
 
 ---
 
@@ -16,33 +18,40 @@ The project demonstrates the practical implementation of fundamental Java progra
 ### 👤 Customer Portal
 
 * Create a new courier
-* Enter customer name
-* Enter destination
-* Enter package weight
-* Enter delivery distance
+* Enter customer name, destination, package weight and delivery distance
+* Delivery eligibility check (deliveries are accepted only up to 500 km)
 * Generate a unique Courier ID
-* Calculate delivery charges
+* Calculate delivery charges automatically
 * Track courier using Courier ID
 * Return to the main menu
 
 ### 👨‍💼 Admin Portal
 
-* View all registered couriers
-* View Courier IDs
-* View courier status
-* View courier charges
+* View all registered couriers with full details (ID, name, destination, weight, distance, status, charge)
 * Update courier status
-* Calculate total revenue
+* View total revenue
+* View a summary of how many couriers are in each status
+* View couriers sorted by highest charge
 * Return to the main menu
 
 ### 🚚 Courier Status
-
-The system supports different delivery statuses:
 
 * PACKAGE CREATED
 * IN TRANSIT
 * OUT FOR DELIVERY
 * DELIVERED
+
+### 💾 Data Saving
+
+* Courier records are saved to `couriers.txt` after every new courier or status update
+* Records are loaded automatically when the program starts
+* If no saved file exists, 5 sample couriers are loaded
+
+### ✅ Input Validation
+
+* Non-numeric input is handled with exception handling instead of crashing the program
+* Empty names and destinations are not accepted
+* Weight and distance must be greater than 0
 
 ---
 
@@ -52,27 +61,55 @@ The system supports different delivery statuses:
 * **IDE:** VS Code
 * **Version Control:** Git & GitHub
 * **Input Handling:** Java Scanner
-* **Data Storage:** Arrays
+* **Data Storage:** `ArrayList` of objects, saved to a text file using `java.nio.file`
 * **Application Type:** Console-based application
+
+---
+
+## Java Concepts Used
+
+| Concept | Where it is used |
+| ------- | ---------------- |
+| Classes and objects | `Courier` class, one object per courier |
+| Constructors (overloading) | One constructor for new couriers, another for loaded or sample couriers |
+| Encapsulation | Private fields in `Courier` with getters and a setter |
+| Static members | `nextId` counter in `Courier` |
+| `toString()` | Displays a courier's details |
+| Exception handling | `try-catch` in `readInt()`, multi-catch while loading the file |
+| String handling | `trim()`, `replace()`, `toUpperCase()`, `isEmpty()`, `split()` |
+| Sorting with `Comparator` | Viewing couriers by highest charge |
+| File I/O | `Files`, `Path`, `BufferedReader`, `BufferedWriter` with `try-with-resources` |
+| Collections | `ArrayList<Courier>`, `Map` |
+| Lambdas and method references | `findCourier()`, `TotalIncome()` |
+| Streams | `filter`, `findFirst`, `mapToInt`, `groupingBy`, `counting` |
 
 ---
 
 ## Program Structure
 
-The project uses separate methods for different operations:
+### `Courier` class
 
-| Method                  | Purpose                                       |
-| ----------------------- | --------------------------------------------- |
-| `CreateDelivery()`      | Takes customer and package details            |
-| `DeliveryCharge()`      | Calculates courier charges                    |
-| `CreateId()`            | Generates a unique courier ID                 |
-| `CourierTracking()`     | Searches for a courier and returns its status |
-| `UpdateStatus()`        | Updates the status of a courier               |
-| `DeliveryEligibility()` | Checks whether a delivery is eligible         |
-| `ViewCouriers()`        | Displays all courier records                  |
-| `TotalIncome()`         | Calculates total revenue                      |
+Stores the ID, name, destination, weight, distance, charge and status of one courier.
 
-The `main()` method controls the overall program flow and provides the Customer and Admin menus.
+### `FinalProject` class
+
+| Method | Purpose |
+| ------ | ------- |
+| `readInt()` / `readText()` | Read and validate user input |
+| `CreateDelivery()` | Takes customer and package details and creates a courier |
+| `DeliveryCharge()` | Calculates courier charges |
+| `DeliveryEligibility()` | Checks whether the distance is within the delivery limit |
+| `findCourier()` | Searches for a courier by ID |
+| `CourierTracking()` | Returns the status of a courier |
+| `UpdateStatus()` | Updates the status of a courier |
+| `ViewCouriers()` | Displays all courier records |
+| `ViewByCharge()` | Displays couriers sorted by highest charge |
+| `TotalIncome()` | Calculates total revenue |
+| `StatusSummary()` | Counts couriers in each status |
+| `saveData()` / `loadData()` | Save to and load from `couriers.txt` |
+| `customerMenu()` / `adminMenu()` | Customer and Admin menus |
+
+The `main()` method loads the saved data and controls the main menu.
 
 ---
 
@@ -91,9 +128,13 @@ Create Courier
   ↓
 Enter Package Details
   ↓
+Eligibility Check
+  ↓
 Generate Courier ID
   ↓
 Calculate Delivery Charge
+  ↓
+Save to File
   ↓
 Track Courier / Create Another Courier
 ```
@@ -112,6 +153,10 @@ View Couriers
 Update Courier Status
      OR
 View Total Revenue
+     OR
+View Status Summary
+     OR
+View Couriers by Highest Charge
   ↓
 Back to Main Menu
 ```
@@ -138,44 +183,40 @@ Back to Main Menu
 6. **Status Management**
    Administrators can update the courier status as the delivery progresses.
 
-7. **Revenue Calculation**
-   The admin can calculate the total income generated by the courier service.
+7. **Revenue and Reports**
+   The admin can see total income, a status summary and couriers sorted by charge.
 
-8. **Demonstrates Core Java Concepts**
-   The project provides practical implementation of methods, arrays, loops, switch statements, conditions, and user input.
+8. **Data Is Saved**
+   Records are stored in a file and are available again after the program is restarted.
+
+9. **Safe Input Handling**
+   Invalid input is handled without crashing the program.
+
+10. **Demonstrates Core Java Concepts**
+    The project applies object-oriented programming, exception handling, file I/O, collections and streams in a practical application.
 
 ---
 
 ## Limitations
 
-* Data is stored only while the program is running.
-* Courier information is stored using arrays.
-* There is no database connection.
-* Customer information is not permanently saved.
-* Destination and distance are currently collected but are not stored for later tracking.
+* Data is stored in a plain text file, not in a database.
+* There is no route system yet; only the destination and distance are stored.
+* Deliveries are limited to a distance of 500 km.
 * There is no graphical user interface.
-* There is no login or authentication system.
+* There is no login or authentication system, so anyone can use the admin portal or track any ID.
+* The saved file is not encrypted.
 
 ---
 
 ## Future Upgrades
 
-The project can be further developed into a more complete courier management application by adding:
-
 ### 1. Database Integration
 
-Use **MySQL** to permanently store:
-
-* Customer details
-* Courier details
-* Courier IDs
-* Delivery status
-* Charges
-* Destination and distance
+Use **MySQL** instead of a text file to store customer details, courier details, delivery status, charges, destination and distance.
 
 ### 2. Route Management
 
-Add a route system that stores the source, destination, distance, and possible delivery route.
+Add a route system that stores the source, destination, distance and possible delivery route.
 
 ### 3. Delivery Time Estimation
 
@@ -218,8 +259,6 @@ The system could eventually be converted into a web application using technologi
 
 ## Conclusion
 
-The **SM Courier Service** project provides a basic computerized solution for managing courier deliveries. It allows customers to create and track packages while providing administrators with tools to manage courier statuses and calculate revenue.
+The **SM Courier Service** project provides a basic computerized solution for managing courier deliveries. It allows customers to create and track packages while providing administrators with tools to manage courier statuses, view reports and calculate revenue.
 
-The project demonstrates how fundamental Java programming concepts can be combined to build a functional real-world application. Although the current version is console-based and uses arrays for data management, it provides a foundation for future improvements such as database integration, route mapping, authentication, GUI development, and real-time tracking.
-
-Overall, the project can be expanded from a basic Java console application into a complete **Courier Management System** with persistent data storage and advanced tracking capabilities.
+The project demonstrates how object-oriented design, exception handling, file handling, collections and streams can be combined to build a functional real-world application. Although the current version is console-based and uses a text file for storage, it provides a foundation for future improvements such as database integration, route mapping, authentication, GUI development and real-time tracking.
